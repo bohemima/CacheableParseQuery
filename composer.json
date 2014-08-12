@@ -1,5 +1,5 @@
 {
-    "name": "funkardotnu/cachableparsequery",
+    "name": "funkardotnu/cacheableparsequery",
     "description": "Adds caching to Parse PHP SDK",
     "keywords": ["parse", "sdk", "cache"],
     "minimum-stability": "beta",
