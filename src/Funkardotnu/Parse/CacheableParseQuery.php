@@ -8,7 +8,7 @@ use \Doctrine\Common\Cache\CacheProvider;
 /**
  * CacheableParseQuery - Handles querying data from Parse - with cache!
  *
- * @package Funkardornu\Parse
+ * @package Funkardotnu\Parse
  * @author Henrik Malmberg <henrik@funkar.nu>
  */
 class CacheableParseQuery extends ParseQuery {
