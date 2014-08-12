@@ -1,0 +1,23 @@
+{
+    "name": "funkardotnu/cachableparsequery",
+    "description": "Adds caching to Parse PHP SDK",
+    "keywords": ["parse", "sdk", "cache"],
+    "minimum-stability": "beta",
+    "license": "ISC",
+    "authors": [
+        {
+            "name": "Henrik Malmberg",
+            "email": "henrik@funkar.nu"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "parse/php-sdk": ">=1.0.0",
+        "doctrine/cache": "1.4.x-dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "Funkardotnu\\Parse\\": "src/Funkardotnu/Parse/"
+        }
+    }
+}
