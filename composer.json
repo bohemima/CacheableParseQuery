@@ -3,6 +3,7 @@
     "description": "Adds caching to Parse PHP SDK",
     "keywords": ["parse", "sdk", "cache"],
     "license": "ISC",
+	"type": "library",
     "authors": [
         {
             "name": "Henrik Malmberg",

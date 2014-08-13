@@ -12,33 +12,48 @@ use \Doctrine\Common\Cache\CacheProvider;
  * @author Henrik Malmberg <henrik@funkar.nu>
  */
 class CacheableParseQuery extends ParseQuery {
+	/**
+	 * @var string Class Name for data stored on Parse.
+	 */
+	private $className;
+
     /**
      * @var int The cache lifetime
      */
-    private $lifeTime = 3600;
+    private $cacheLifetime = 3600;
 
     /**
      * @var bool Defines if we want to use cache or not
      */
-    private $useCache = true;
+    private $cacheEnabled = true;
 
     /**
      * @var CacheProvider Cache provider to use
      */
     private $cacheProvider;
 
+	/**
+	 * @inheritdoc
+	 */
+	public function __construct($className) {
+		// We need to do this, because className is private in ParseQuery class.
+		// We'll use the class name as a part of the cacheKey
+		$this->className = $className;
+		return parent::__construct($className);
+	}
+
     /**
      * @inheritdoc
      * @throws \BadFunctionCallException If not CacheProvider has been set.
      */
     public function find($useMasterKey = false) {
-        if ($this->useCache && !$this->cacheProvider instanceof CacheProvider) {
+        if ($this->cacheEnabled && !$this->cacheProvider instanceof CacheProvider) {
             throw new \BadFunctionCallException('Cache is enabled but no CacheProvider has been set.');
         }
 
         // Try cache first
-        if ($this->useCache) {
-            $cacheKey = md5(serialize($this->_getOptions()));
+        if ($this->cacheEnabled) {
+            $cacheKey = $this->getCacheKey();
             if ($this->cacheProvider->contains($cacheKey)) {
                 $cachedResult = unserialize($this->cacheProvider->fetch($cacheKey));
                 if ($cachedResult !== false) {
@@ -50,15 +65,56 @@ class CacheableParseQuery extends ParseQuery {
         // Item was not found in cache
         $result = parent::find($useMasterKey);
 
-        if ($this->useCache) {
-            $this->cacheProvider->save($cacheKey, serialize($result), $this->lifeTime);
+        if ($this->cacheEnabled) {
+            $this->cacheProvider->save($cacheKey, serialize($result), $this->cacheLifetime);
         }
 
         return $result;
     }
 
+	/**
+	 * Test if an entry exists in the cache.
+	 *
+	 * @return bool TRUE if the current ClassName & query parameters exists in the cache.
+	 * @throws \BadFunctionCallException If not CacheProvider has been set.
+	 */
+	public function hasCachedResult() {
+		if (!$this->cacheProvider instanceof CacheProvider) {
+			throw new \BadFunctionCallException('No CacheProvider has been set.');
+		}
+
+		$cacheKey = $this->getCacheKey();
+		return $this->cacheProvider->contains($cacheKey);
+	}
+
+	/**
+	 * Deletes the current cache entry for this query.
+	 *
+	 * @return bool TRUE if the cache entry was successfully deleted, FALSE otherwise.
+	 * @throws \BadFunctionCallException
+	 */
+	public function clearCachedResult() {
+		if (!$this->cacheProvider instanceof CacheProvider) {
+			throw new \BadFunctionCallException('No CacheProvider has been set.');
+		}
+
+		$cacheKey = $this->getCacheKey();
+		return $this->cacheProvider->delete($cacheKey);
+	}
+
+	/**
+	 * Returns a md5 representation of the current query.
+	 *
+	 * @return string A md5 string respresentation of the current query.
+	 */
+	private function getCacheKey() {
+		return md5($this->className . serialize($this->_getOptions()));
+	}
+
     /**
-     * @return bool TRUE if the cache entries were successfully deleted, FALSE otherwise.
+     * Clears all cached query entries.
+     *
+     * @return bool TRUE if all the cache entries were successfully deleted, FALSE otherwise.
      * @throws \BadFunctionCallException If not CacheProvider has been set.
      */
     public function clearAllCachedResults() {
@@ -70,31 +126,31 @@ class CacheableParseQuery extends ParseQuery {
     }
 
     /**
-     * @return boolean Indicates if we should use cache.
+     * @return boolean Indicates if we cache is enabled.
      */
-    public function getUseCache() {
-        return $this->useCache;
+    public function isCacheEnabled() {
+        return $this->cacheEnabled;
     }
 
     /**
-     * @param boolean $useCache Set if we should use cache.
+     * @param boolean $useCache Set if we should enable cache.
      */
-    public function setUseCache($useCache) {
-        $this->useCache = (bool)$useCache;
+    public function setCacheEnabled($useCache) {
+        $this->cacheEnabled = (bool)$useCache;
     }
 
     /**
      * @return int Get cache lifetime (0 = forever).
      */
-    public function getLifeTime() {
-        return $this->lifeTime;
+    public function getCacheLifetime() {
+        return $this->cacheLifetime;
     }
 
     /**
      * @param int $lifeTime Sets a specific lifetime for cache entries (0 = forever).
      */
-    public function setLifeTime($lifeTime) {
-        $this->lifeTime = $lifeTime;
+    public function setCacheLifetime($lifeTime) {
+        $this->cacheLifetime = $lifeTime;
     }
 
     /**
