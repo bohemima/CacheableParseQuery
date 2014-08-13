@@ -11,7 +11,7 @@ The easiest way is to use composer
 ```json
 {
   "require": {
-    "funkardotnu/cacheableparsequery" : "dev-master"
+    "funkardotnu/cacheableparsequery" : "0.0.1"
   }
 }
 ```
