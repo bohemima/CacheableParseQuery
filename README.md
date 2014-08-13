@@ -11,7 +11,7 @@ The easiest way is to use composer
 ```json
 {
   "require": {
-    "funkardotnu/cacheableparsequery" : "0.0.1"
+    "funkardotnu/cacheableparsequery" : "dev-master"
   }
 }
 ```
@@ -34,9 +34,16 @@ $cache->setNamespace('parsequerycache'); // Optionally set a cache namespace
 $query = new CacheableParseQuery('SomeClass');
 $query->setCacheProvider($cache);
 $query->setLifetime(300); // Default is 3600 - 1 hour
+$query->limit(3); // Limit to three items, just to test.
 
-$query->find(); // First call will use live data
-$query->find(); // This call will use cached data
+echo ($query->hasCachedResult() ? 'From cache' : 'Live data') . ':<br>';
+var_dump($query->find()); // First call will use live data
+
+echo ($query->hasCachedResult() ? 'From cache' : 'Live data') . ':<br>';
+var_dump($query->find()); // This call will use cached data
+
+// Clear all cached data
+$query->clearAllCachedResults();
 ```
 
 Problem? Idea?
